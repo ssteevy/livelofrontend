@@ -1,25 +1,24 @@
 import { categories } from "@/data/home";
-import { CategoryCard } from "@/components/cards/CategoryCard";
 import { Reveal } from "@/components/ui/Reveal";
 
 export function CategoriesSection() {
   return (
-    <section id="categories" className="bg-[#F8FAFC] px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <Reveal className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-black uppercase text-[#EDA415]">Catégories</p>
-            <h2 className="mt-2 text-3xl font-black text-[#4E73C7] sm:text-4xl">Explorez le marché local</h2>
+    <section id="categories" className="w-full bg-[#F8FAFC] px-4 pb-6 sm:px-6 lg:px-8">
+      <div className="w-full overflow-hidden rounded-2xl border border-[#B3D4E5] bg-white shadow-[0_18px_50px_rgba(78,115,199,0.08)]">
+        <Reveal className="flex items-center gap-5 overflow-x-auto px-4 py-4 sm:px-5">
+          <p className="shrink-0 text-sm font-black uppercase text-[#EDA415]">Catégories</p>
+          <div className="flex min-w-max items-center gap-3">
+            {categories.map((category) => (
+              <a
+                key={category.name}
+                href="#produits"
+                className="shrink-0 rounded-full border border-[#B3D4E5] bg-[#F8FAFC] px-4 py-2 text-sm font-black text-[#4E73C7] transition hover:border-[#EDA415] hover:text-[#EDA415]"
+              >
+                {category.name}
+              </a>
+            ))}
           </div>
-          <a href="#produits" className="font-bold text-[#4E73C7] hover:text-[#EDA415]">Voir tout</a>
         </Reveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {categories.map((category, index) => (
-            <Reveal key={category.name} delay={index * 0.03}>
-              <CategoryCard category={category} />
-            </Reveal>
-          ))}
-        </div>
       </div>
     </section>
   );

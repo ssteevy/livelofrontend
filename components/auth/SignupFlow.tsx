@@ -1,8 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { Check, Eye, EyeOff, Star } from "lucide-react";
-import { ChangeEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, Eye, EyeOff } from "lucide-react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+
+import { useAuth } from "@/components/auth/AuthProvider";
+import { getApiErrorMessage } from "@/lib/api";
+import { authApi, geoApi, type City } from "@/lib/auth";
 
 type SignupStep = "email" | "code" | "password" | "details";
 
@@ -41,8 +46,15 @@ const departments = [
 
 function StepIcon() {
   return (
-    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#EDA415] text-white shadow-[0_14px_40px_rgba(237,164,21,0.24)]">
-      <Star aria-hidden="true" size={36} fill="currentColor" />
+    <div className="relative mx-auto h-14 w-14 overflow-hidden rounded-xl shadow-[0_10px_28px_rgba(78,115,199,0.16)]">
+      <Image
+        src="/livelo-auth-favicon.png"
+        alt="Livelo Haiti"
+        fill
+        priority
+        sizes="56px"
+        className="object-cover"
+      />
     </div>
   );
 }
@@ -66,6 +78,27 @@ function SubmitButton({
       {children}
     </button>
   );
+}
+
+function Feedback({ message, error }: { message: string; error: string }) {
+  if (!message && !error) return null;
+
+  return (
+    <p
+      role={error ? "alert" : "status"}
+      className={`mt-5 rounded-md px-4 py-3 text-left text-sm font-semibold ${
+        error ? "bg-red-50 text-red-700" : "bg-[#E2F4FF] text-[#4E73C7]"
+      }`}
+    >
+      {error || message}
+    </p>
+  );
+}
+
+function normalizePhone(phone: string) {
+  const trimmed = phone.replace(/\s/g, "");
+  if (trimmed.startsWith("+509")) return trimmed;
+  return `+509${trimmed}`;
 }
 
 function TextInput({
@@ -116,13 +149,20 @@ function AuthFooter() {
 }
 
 export function SignupFlow() {
+  const router = useRouter();
+  const { completeRegister } = useAuth();
   const [step, setStep] = useState<SignupStep>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", ""]);
+  const [tempToken, setTempToken] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [details, setDetails] = useState<PersonalDetails>(initialDetails);
+  const [cities, setCities] = useState<City[]>([]);
+  const [apiMessage, setApiMessage] = useState("");
+  const [apiError, setApiError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const passwordRules = useMemo(
     () => [
@@ -139,14 +179,24 @@ export function SignupFlow() {
   const isCodeValid = code.every((digit) => /^\d$/.test(digit));
   const isPasswordValid = passwordRules.every((rule) => rule.valid);
   const doPasswordsMatch = password.length > 0 && password === confirmPassword;
-  const areDetailsValid =
+  const normalizedPhone = normalizePhone(details.phone);
+  const areDetailsValid = Boolean(
     details.firstName &&
     details.lastName &&
     details.birthDate &&
-    details.phone &&
-    details.department &&
-    details.city &&
-    details.acceptTerms;
+    /^\+509[234]\d{7}$/.test(normalizedPhone) &&
+    (cities.length === 0 || (details.department && details.city)) &&
+    details.acceptTerms,
+  );
+
+  const citiesForDepartment = useMemo(() => {
+    if (!details.department) return cities;
+    return cities.filter((city) => city.departments?.nom === details.department);
+  }, [cities, details.department]);
+
+  useEffect(() => {
+    geoApi.cities().then(setCities).catch(() => setCities([]));
+  }, []);
 
   function updateDetail<Key extends keyof PersonalDetails>(key: Key, value: PersonalDetails[Key]) {
     setDetails((current) => ({ ...current, [key]: value }));
@@ -155,6 +205,68 @@ export function SignupFlow() {
   function handleCodeChange(index: number, value: string) {
     const digit = value.replace(/\D/g, "").slice(-1);
     setCode((current) => current.map((item, itemIndex) => (itemIndex === index ? digit : item)));
+  }
+
+  function clearFeedback() {
+    setApiError("");
+    setApiMessage("");
+  }
+
+  async function submitEmail() {
+    if (!isEmailValid || isSubmitting) return;
+
+    clearFeedback();
+    setIsSubmitting(true);
+    try {
+      const response = await authApi.initiateRegister(email);
+      setApiMessage(response.message);
+      setStep("code");
+    } catch (error) {
+      setApiError(getApiErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function submitOtp() {
+    if (!isCodeValid || isSubmitting) return;
+
+    clearFeedback();
+    setIsSubmitting(true);
+    try {
+      const response = await authApi.verifyOtp(email, code.join(""));
+      setTempToken(response.temp_token);
+      setStep("password");
+    } catch (error) {
+      setApiError(getApiErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function submitDetails() {
+    if (!areDetailsValid || isSubmitting) return;
+
+    clearFeedback();
+    setIsSubmitting(true);
+    try {
+      await completeRegister({
+        temp_token: tempToken,
+        password,
+        confirme_password: confirmPassword,
+        prenom: details.firstName,
+        nom: details.lastName,
+        date_naissance: details.birthDate,
+        telephone: normalizedPhone,
+        city_id: details.city || undefined,
+        cgu_acceptees: details.acceptTerms,
+      });
+      router.push("/profil");
+    } catch (error) {
+      setApiError(getApiErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function renderEmailStep() {
@@ -172,8 +284,9 @@ export function SignupFlow() {
             placeholder="Adresse email*"
           />
         </div>
-        <SubmitButton disabled={!isEmailValid} onClick={() => setStep("code")}>
-          CONTINUER
+        <Feedback message={apiMessage} error={apiError} />
+        <SubmitButton disabled={!isEmailValid || isSubmitting} onClick={submitEmail}>
+          {isSubmitting ? "ENVOI..." : "CONTINUER"}
         </SubmitButton>
         <div className="mt-10 flex items-center gap-3 text-sm text-[#ACACAC]">
           <span className="h-px flex-1 bg-[#B3D4E5]" />
@@ -214,8 +327,9 @@ export function SignupFlow() {
             />
           ))}
         </div>
-        <SubmitButton disabled={!isCodeValid} onClick={() => setStep("password")}>
-          VALIDER
+        <Feedback message={apiMessage} error={apiError} />
+        <SubmitButton disabled={!isCodeValid || isSubmitting} onClick={submitOtp}>
+          {isSubmitting ? "VALIDATION..." : "VALIDER"}
         </SubmitButton>
         <p className="mt-5 text-center text-sm leading-6 text-black">
           Vous n&apos;avez pas reçu le code ? Vous pourrez demander un nouveau code dans{" "}
@@ -283,7 +397,11 @@ export function SignupFlow() {
             <p className="text-[#EDA415]">Les deux mots de passe doivent être identiques.</p>
           ) : null}
         </div>
-        <SubmitButton disabled={!isPasswordValid || !doPasswordsMatch} onClick={() => setStep("details")}>
+        <Feedback message={apiMessage} error={apiError} />
+        <SubmitButton disabled={!isPasswordValid || !doPasswordsMatch} onClick={() => {
+          clearFeedback();
+          setStep("details");
+        }}>
           CONTINUER
         </SubmitButton>
       </>
@@ -305,17 +423,19 @@ export function SignupFlow() {
               <span className="sr-only">Préfixe</span>
               <select className="h-14 w-full rounded-sm border border-[#ACACAC] bg-white px-3 text-[#4E73C7] focus:border-[#4E73C7] focus:outline-none" defaultValue="+509">
                 <option>+509</option>
-                <option>+1</option>
               </select>
             </label>
-            <TextInput label="Téléphone" value={details.phone} onChange={(value) => updateDetail("phone", value)} placeholder="Numéro de téléphone*" />
+            <TextInput label="Téléphone" value={details.phone} onChange={(value) => updateDetail("phone", value)} placeholder="34123456*" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <label>
               <span className="sr-only">Département</span>
               <select
                 value={details.department}
-                onChange={(event) => updateDetail("department", event.target.value)}
+                onChange={(event) => {
+                  updateDetail("department", event.target.value);
+                  updateDetail("city", "");
+                }}
                 className="h-14 w-full rounded-sm border border-[#ACACAC] bg-white px-4 text-[#4E73C7] focus:border-[#4E73C7] focus:outline-none"
               >
                 <option value="">Département*</option>
@@ -324,7 +444,21 @@ export function SignupFlow() {
                 ))}
               </select>
             </label>
-            <TextInput label="Ville" value={details.city} onChange={(value) => updateDetail("city", value)} placeholder="Ville*" />
+            <label>
+              <span className="sr-only">Ville</span>
+              <select
+                value={details.city}
+                onChange={(event) => updateDetail("city", event.target.value)}
+                className="h-14 w-full rounded-sm border border-[#ACACAC] bg-white px-4 text-[#4E73C7] focus:border-[#4E73C7] focus:outline-none"
+              >
+                <option value="">{cities.length > 0 ? "Ville*" : "Ville indisponible"}</option>
+                {citiesForDepartment.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.nom}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           <label className="flex items-start gap-3 text-sm leading-6 text-black">
             <input
@@ -340,8 +474,9 @@ export function SignupFlow() {
             </span>
           </label>
         </div>
-        <SubmitButton disabled={!areDetailsValid} onClick={() => undefined}>
-          TERMINER
+        <Feedback message={apiMessage} error={apiError} />
+        <SubmitButton disabled={!areDetailsValid || isSubmitting} onClick={submitDetails}>
+          {isSubmitting ? "CRÉATION..." : "TERMINER"}
         </SubmitButton>
       </>
     );

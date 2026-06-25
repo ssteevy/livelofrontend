@@ -37,7 +37,7 @@ export function Navbar() {
           <a href="#panier" aria-label="Panier" className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#B3D4E5] text-[#4E73C7] transition hover:bg-[#E2F4FF]">
             <ShoppingCart size={20} />
           </a>
-          <a href="#profil" aria-label="Profil" className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-[#B3D4E5] text-[#4E73C7] transition hover:bg-[#E2F4FF] sm:flex">
+          <a href="/profil" aria-label="Profil" className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-[#B3D4E5] text-[#4E73C7] transition hover:bg-[#E2F4FF] sm:flex">
             <CircleUserRound size={20} />
           </a>
           <button aria-label="Ouvrir le menu" className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#4E73C7] text-white lg:hidden">

@@ -24,7 +24,7 @@ export function Header() {
             <a href="#instagram" aria-label="Instagram" className="hover:text-[#EDA415]"><AtSign size={16} /></a>
             <a href="#linkedin" aria-label="LinkedIn" className="hover:text-[#EDA415]"><Send size={16} /></a>
           </div>
-          <Button href="#connexion" variant="ghost" className="min-h-9 px-3 py-2">Connexion</Button>
+          <Button href="/connexion" variant="ghost" className="min-h-9 px-3 py-2">Connexion</Button>
           <Button href="/inscription" variant="accent" className="min-h-9 px-3 py-2">Inscription</Button>
         </div>
       </div>
