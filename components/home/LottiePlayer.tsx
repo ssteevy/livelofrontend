@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 
 type LottieData = Record<string, unknown>;
 
-export function DeliveryLottie({ className = "" }: { className?: string }) {
+export function LottiePlayer({ src, className = "" }: { src: string; className?: string }) {
   const [data, setData] = useState<LottieData | null>(null);
 
   useEffect(() => {
     let active = true;
-    fetch("/animations/delivery.json")
+    fetch(src)
       .then((response) => response.json())
       .then((json: LottieData) => {
         if (active) setData(json);
@@ -21,7 +21,7 @@ export function DeliveryLottie({ className = "" }: { className?: string }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [src]);
 
   if (!data) return <div className={className} aria-hidden="true" />;
 
