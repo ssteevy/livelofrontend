@@ -93,7 +93,7 @@ export function HeroSection() {
             </AnimatePresence>
 
             <div className="relative mx-auto hidden aspect-square w-full max-w-sm animate-float lg:block">
-              <Image src="/livelo-hero-marketplace.png" alt="Livelo Haiti marketplace" fill priority sizes="384px" className="object-contain drop-shadow-2xl" />
+              <Image src="/livelo-hero-marketplace-v3.png" alt="Livelo Haiti marketplace" fill priority sizes="384px" className="object-contain drop-shadow-2xl" />
             </div>
           </div>
 
