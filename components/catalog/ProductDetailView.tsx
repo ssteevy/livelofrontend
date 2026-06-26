@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ImageIcon, MapPin, Store, Truck } from "lucide-react";
+import { ArrowLeft, Check, ImageIcon, MapPin, Minus, Plus, ShoppingCart, Store, Truck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { getApiErrorMessage } from "@/lib/api";
@@ -10,15 +10,19 @@ import { useSelectedCity } from "@/lib/city";
 import { discountLabel, formatHtg } from "@/lib/format";
 import { productsApi, type ProductDetail } from "@/lib/products";
 import type { City } from "@/lib/auth";
+import { useCart } from "@/components/cart/CartProvider";
 import { CitySelect } from "@/components/catalog/CitySelect";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorState } from "@/components/ui/StateBlocks";
 
 export function ProductDetailView({ productId }: { productId: string }) {
   const { city, setCity } = useSelectedCity();
+  const { add } = useCart();
   const [cityId, setCityId] = useState("");
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [activeImage, setActiveImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +47,13 @@ export function ProductDetailView({ productId }: { productId: string }) {
   function handleCityChange(value: string, selected: City | null) {
     setCityId(value);
     setCity(selected ? { id: selected.id, nom: selected.nom } : null);
+  }
+
+  function handleAddToCart() {
+    if (!product || product.stock <= 0) return;
+    add(product, quantity);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1600);
   }
 
   if (loading) {
@@ -131,6 +142,40 @@ export function ProductDetailView({ productId }: { productId: string }) {
 
           {product.description ? (
             <p className="whitespace-pre-line text-sm leading-6 text-gray-700">{product.description}</p>
+          ) : null}
+
+          {product.stock > 0 ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center rounded-2xl border border-[#B3D4E5] bg-white">
+                <button
+                  type="button"
+                  aria-label="Diminuer"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="flex h-12 w-12 items-center justify-center text-[#4E73C7] transition hover:bg-[#E2F4FF] disabled:opacity-40"
+                  disabled={quantity <= 1}
+                >
+                  <Minus size={18} />
+                </button>
+                <span className="w-10 text-center text-sm font-black text-[#4E73C7]">{quantity}</span>
+                <button
+                  type="button"
+                  aria-label="Augmenter"
+                  onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                  className="flex h-12 w-12 items-center justify-center text-[#4E73C7] transition hover:bg-[#E2F4FF] disabled:opacity-40"
+                  disabled={quantity >= product.stock}
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#EDA415] px-6 text-sm font-black text-white shadow-[0_8px_24px_rgba(237,164,21,0.32)] transition hover:-translate-y-0.5 hover:bg-[#EDA415]/90 active:scale-[0.98]"
+              >
+                {added ? <Check size={19} /> : <ShoppingCart size={19} />}
+                {added ? "Ajouté au panier" : "Ajouter au panier"}
+              </button>
+            </div>
           ) : null}
 
           {product.shops ? (

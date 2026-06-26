@@ -1,61 +1,140 @@
-import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+"use client";
 
-import { iconMap } from "@/components/cards/icon-map";
-import { Reveal } from "@/components/ui/Reveal";
-import { categories } from "@/data/home";
+import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ShieldCheck, Store, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface Slide {
+  eyebrow: string;
+  title: string;
+  text: string;
+  cta: string;
+  href: string;
+  gradient: string;
+}
+
+const slides: Slide[] = [
+  {
+    eyebrow: "Marketplace #1 en Haïti",
+    title: "Tout Haïti, livré chez vous",
+    text: "Des milliers de produits des meilleures boutiques locales, livrés dans les 10 départements.",
+    cta: "Explorer le catalogue",
+    href: "/produits",
+    gradient: "from-[#4E73C7] to-[#4E73C7]/80",
+  },
+  {
+    eyebrow: "Paiement sécurisé",
+    title: "Payez sereinement avec MonCash",
+    text: "Votre argent est protégé par l'escrow Livelo jusqu'à la réception de votre commande.",
+    cta: "Comment ça marche",
+    href: "/produits",
+    gradient: "from-[#EDA415] to-[#4E73C7]",
+  },
+  {
+    eyebrow: "Vendeurs",
+    title: "Ouvrez votre boutique en ligne",
+    text: "Vendez partout en Haïti, fixez vos prix de livraison et recevez vos paiements via MonCash.",
+    cta: "Devenir vendeur",
+    href: "/devenir-vendeur",
+    gradient: "from-[#30BD57] to-[#4E73C7]",
+  },
+];
+
+const sideCards = [
+  { icon: Truck, title: "Livraison nationale", text: "10 départements couverts", href: "/produits" },
+  { icon: Store, title: "Devenir vendeur", text: "Ouvrez votre boutique", href: "/devenir-vendeur" },
+];
 
 export function HeroSection() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setIndex((i) => (i + 1) % slides.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const slide = slides[index];
+
   return (
-    <section className="w-full bg-[#F8FAFC] px-4 pb-4 pt-5 sm:px-6 lg:px-8">
-      <Reveal className="grid w-full items-stretch gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="order-2 rounded-2xl border border-[#B3D4E5] bg-white p-3 shadow-[0_20px_55px_rgba(78,115,199,0.10)] lg:order-1 lg:min-h-full lg:p-4">
-          <div className="flex items-center justify-between px-2 pb-3">
-            <p className="text-sm font-black uppercase text-[#EDA415]">Catalogue</p>
-            <a href="#produits" className="text-xs font-black text-[#4E73C7] hover:text-[#EDA415]">
-              Tout voir
-            </a>
+    <section className="w-full px-4 pb-2 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        {/* Carrousel principal */}
+        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${slide.gradient} transition-all duration-700`}>
+          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
+
+          <div className="grid items-center gap-4 p-6 sm:p-9 lg:grid-cols-2 lg:p-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -18 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="text-white"
+              >
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-black backdrop-blur">
+                  <ShieldCheck size={13} className="text-[#EDA415]" />
+                  {slide.eyebrow}
+                </span>
+                <h1 className="mt-4 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">{slide.title}</h1>
+                <p className="mt-3 max-w-md text-sm font-medium text-white/85 sm:text-base">{slide.text}</p>
+                <Link
+                  href={slide.href}
+                  className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-sm font-black text-[#4E73C7] shadow-lg transition hover:-translate-y-0.5 hover:bg-[#EDA415] hover:text-white"
+                >
+                  {slide.cta}
+                  <ArrowRight size={18} />
+                </Link>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="relative mx-auto hidden aspect-square w-full max-w-sm animate-float lg:block">
+              <Image src="/livelo-hero-marketplace.png" alt="Livelo Haiti marketplace" fill priority sizes="384px" className="object-contain drop-shadow-2xl" />
+            </div>
           </div>
 
-          <nav aria-label="Catalogue Livelo" className="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-1 lg:overflow-visible lg:pb-0">
-            {categories.map((category) => {
-              const Icon = iconMap[category.icon];
-
-              return (
-                <a
-                  key={category.name}
-                  href="#produits"
-                  className="group flex min-w-[220px] items-center justify-between gap-3 rounded-xl border border-[#E2F4FF] bg-[#F8FAFC] px-3 py-3 text-left transition hover:border-[#EDA415] hover:bg-white lg:min-w-0 lg:border-transparent lg:bg-white"
-                >
-                  <span className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E2F4FF] text-[#4E73C7] transition group-hover:bg-[#4E73C7] group-hover:text-white">
-                      <Icon aria-hidden="true" size={18} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-black text-[#4E73C7]">{category.name}</span>
-                      <span className="block truncate text-xs font-semibold text-[#ACACAC]">{category.description}</span>
-                    </span>
-                  </span>
-                  <ChevronRight aria-hidden="true" size={16} className="hidden shrink-0 text-[#ACACAC] lg:block" />
-                </a>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <div className="order-1 overflow-hidden rounded-2xl border border-[#B3D4E5] bg-white shadow-[0_24px_70px_rgba(78,115,199,0.14)] lg:order-2">
-          <div className="relative aspect-[1.78] min-h-[300px] w-full sm:min-h-[420px] lg:min-h-[560px]">
-            <Image
-              src="/livelo-hero-marketplace.png"
-              alt="Livelo Haiti, marketplace de produits livrés partout en Haïti"
-              fill
-              priority
-              sizes="(min-width: 1280px) calc(100vw - 384px), (min-width: 1024px) calc(100vw - 344px), 100vw"
-              className="object-contain"
-            />
+          {/* Dots */}
+          <div className="absolute bottom-4 left-6 flex gap-2 sm:left-9 lg:left-12">
+            {slides.map((_, dot) => (
+              <button
+                key={dot}
+                type="button"
+                aria-label={`Slide ${dot + 1}`}
+                onClick={() => setIndex(dot)}
+                className={`h-2 rounded-full transition-all ${dot === index ? "w-6 bg-white" : "w-2 bg-white/40"}`}
+              />
+            ))}
           </div>
         </div>
-      </Reveal>
+
+        {/* Cartes latérales */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+          {sideCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group flex flex-col justify-between rounded-3xl border border-[#B3D4E5] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#4E73C7]/40 hover:shadow-[0_18px_40px_rgba(78,115,199,0.16)] lg:min-h-[8rem]"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E2F4FF] text-[#4E73C7] transition group-hover:bg-[#4E73C7] group-hover:text-white">
+                  <Icon aria-hidden="true" size={22} />
+                </span>
+                <span className="mt-3">
+                  <span className="block text-sm font-black text-[#4E73C7]">{card.title}</span>
+                  <span className="mt-0.5 flex items-center gap-1 text-xs font-bold text-[#ACACAC] group-hover:text-[#EDA415]">
+                    {card.text}
+                    <ArrowRight size={12} className="transition group-hover:translate-x-0.5" />
+                  </span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </section>
   );
 }

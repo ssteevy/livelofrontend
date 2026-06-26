@@ -29,19 +29,20 @@ export function PopularProducts() {
   }, [load]);
 
   return (
-    <section id="produits" className="w-full bg-white px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-      <div className="w-full">
-        <Reveal className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section id="produits" className="w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto w-full max-w-7xl">
+        <Reveal className="mb-6 flex items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-black uppercase text-[#EDA415]">Produits populaires</p>
-            <h2 className="mt-2 text-3xl font-black text-[#4E73C7] sm:text-4xl">Les meilleures offres près de vous</h2>
+            <p className="text-xs font-black uppercase tracking-wide text-[#EDA415]">Produits populaires</p>
+            <h2 className="mt-1 text-2xl font-black text-[#4E73C7] sm:text-3xl">Les meilleures offres près de vous</h2>
           </div>
-          <Link href="/produits" className="inline-flex items-center gap-2 text-sm font-black text-[#4E73C7] transition hover:text-[#EDA415]">
-            Voir tout le catalogue
+          <Link href="/produits" className="inline-flex shrink-0 items-center gap-2 text-sm font-black text-[#4E73C7] transition hover:text-[#EDA415]">
+            <span className="hidden sm:inline">Voir tout le catalogue</span>
+            <span className="sm:hidden">Tout voir</span>
             <ArrowRight aria-hidden="true" size={18} />
           </Link>
         </Reveal>
-        <div className="mt-8">
+        <div>
           <ProductGrid
             products={products}
             loading={loading}

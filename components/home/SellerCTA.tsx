@@ -12,8 +12,8 @@ const sellerBenefits = [
 
 export function SellerCTA() {
   return (
-    <section id="vendeur" className="bg-white px-4 py-16 sm:px-6 lg:px-8">
-      <Reveal className="mx-auto grid max-w-7xl gap-8 overflow-hidden rounded-[2rem] bg-[#4E73C7] p-6 text-white shadow-[0_24px_90px_rgba(78,115,199,0.24)] sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+    <section id="vendeur" className="px-4 py-10 sm:px-6 lg:px-8">
+      <Reveal className="mx-auto grid max-w-7xl gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#4E73C7] to-[#4E73C7]/85 p-6 text-white shadow-[0_24px_90px_rgba(78,115,199,0.24)] sm:p-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <div>
           <p className="text-sm font-black uppercase text-[#E2F4FF]">Espace vendeur</p>
           <h2 className="mt-3 text-3xl font-black sm:text-4xl">Développez votre boutique avec Livelo</h2>
