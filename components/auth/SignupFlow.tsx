@@ -1,13 +1,30 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Eye, EyeOff } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { getApiErrorMessage } from "@/lib/api";
 import { authApi, geoApi, type City } from "@/lib/auth";
+
+const STEP_ORDER: SignupStep[] = ["email", "code", "password", "details"];
+
+function StepIndicator({ step }: { step: SignupStep }) {
+  const current = STEP_ORDER.indexOf(step);
+  return (
+    <div className="mb-6 flex items-center gap-2">
+      {STEP_ORDER.map((_, index) => (
+        <span
+          key={index}
+          className={`h-1.5 flex-1 rounded-full transition-all ${index <= current ? "bg-[#EDA415]" : "bg-[#B3D4E5]"}`}
+        />
+      ))}
+    </div>
+  );
+}
 
 type SignupStep = "email" | "code" | "password" | "details";
 
@@ -43,21 +60,6 @@ const departments = [
   "Grand'Anse",
   "Nippes",
 ];
-
-function StepIcon() {
-  return (
-    <div className="relative mx-auto h-14 w-14 overflow-hidden rounded-xl shadow-[0_10px_28px_rgba(78,115,199,0.16)]">
-      <Image
-        src="/livelo-auth-favicon.png"
-        alt="Livelo Haiti"
-        fill
-        priority
-        sizes="56px"
-        className="object-cover"
-      />
-    </div>
-  );
-}
 
 function SubmitButton({
   children,
@@ -125,26 +127,6 @@ function TextInput({
         className="h-14 w-full rounded-sm border border-[#ACACAC] bg-white px-4 text-base text-[#4E73C7] placeholder:text-[#ACACAC] focus:border-[#4E73C7] focus:outline-none"
       />
     </label>
-  );
-}
-
-function AuthFooter() {
-  return (
-    <div className="mt-auto flex flex-col items-center gap-6 pb-8 pt-12 text-center text-sm text-black">
-      <p>
-        Besoin d&apos;aide ? Visitez notre centre d&apos;aide ou contactez-nous au{" "}
-        <a href="tel:+50900000000" className="font-semibold text-[#4E73C7]">
-          +509 0000 0000
-        </a>
-      </p>
-      <Image
-        src="/livelo-logo-transparent.png"
-        alt="Livelo Haiti"
-        width={116}
-        height={78}
-        className="h-12 w-auto object-contain"
-      />
-    </div>
   );
 }
 
@@ -271,9 +253,7 @@ export function SignupFlow() {
 
   function renderEmailStep() {
     return (
-      <>
-        <StepIcon />
-        <h1 className="mt-5 text-xl font-black text-black">Bienvenue sur Livelo</h1>
+      <>        <h1 className="mt-5 text-xl font-black text-black">Bienvenue sur Livelo</h1>
         <p className="mt-3 text-base text-black/80">Utilisez votre email pour vous inscrire.</p>
         <div className="mt-9">
           <TextInput
@@ -308,9 +288,7 @@ export function SignupFlow() {
 
   function renderCodeStep() {
     return (
-      <>
-        <StepIcon />
-        <h1 className="mt-5 text-xl font-black text-black">Vérifiez votre adresse email</h1>
+      <>        <h1 className="mt-5 text-xl font-black text-black">Vérifiez votre adresse email</h1>
         <p className="mx-auto mt-3 max-w-xs text-base leading-6 text-black/80">
           Nous avons envoyé un code de vérification à <span className="font-semibold">{email}</span>
         </p>
@@ -341,9 +319,7 @@ export function SignupFlow() {
 
   function renderPasswordStep() {
     return (
-      <>
-        <StepIcon />
-        <h1 className="mt-5 text-xl font-black text-black">Créez votre compte</h1>
+      <>        <h1 className="mt-5 text-xl font-black text-black">Créez votre compte</h1>
         <p className="mx-auto mt-3 max-w-sm text-base leading-6 text-black/80">
           Définissez un mot de passe sécurisé pour protéger votre compte Livelo.
         </p>
@@ -410,9 +386,7 @@ export function SignupFlow() {
 
   function renderDetailsStep() {
     return (
-      <>
-        <StepIcon />
-        <h1 className="mt-5 text-xl font-black text-black">Informations personnelles</h1>
+      <>        <h1 className="mt-5 text-xl font-black text-black">Informations personnelles</h1>
         <p className="mt-3 text-base text-black/80">Nous avons besoin de quelques détails pour finaliser votre compte.</p>
         <div className="mt-8 space-y-5 text-left">
           <TextInput label="Prénom" value={details.firstName} onChange={(value) => updateDetail("firstName", value)} placeholder="Prénom*" />
@@ -483,14 +457,20 @@ export function SignupFlow() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white px-4">
-      <main className="mx-auto w-full max-w-[432px] flex-1 pt-14 text-center sm:pt-20">
+    <AuthShell>
+      <StepIndicator step={step} />
+      <div className="text-center sm:text-left">
         {step === "email" ? renderEmailStep() : null}
         {step === "code" ? renderCodeStep() : null}
         {step === "password" ? renderPasswordStep() : null}
         {step === "details" ? renderDetailsStep() : null}
-      </main>
-      <AuthFooter />
-    </div>
+      </div>
+      <p className="mt-7 text-center text-sm font-medium text-[#4E73C7]">
+        Vous avez déjà un compte ?{" "}
+        <Link href="/connexion" className="font-black text-[#EDA415] hover:underline">
+          Se connecter
+        </Link>
+      </p>
+    </AuthShell>
   );
 }
