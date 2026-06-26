@@ -92,8 +92,15 @@ export function HeroSection() {
               </motion.div>
             </AnimatePresence>
 
-            <div className="relative mx-auto hidden aspect-square w-full max-w-sm animate-float lg:block">
-              <Image src="/livelo-hero-marketplace-v3.png" alt="Livelo Haiti marketplace" fill priority sizes="384px" className="object-contain drop-shadow-2xl" />
+            <div className="relative mx-auto hidden aspect-[3/2] w-full max-w-md animate-float lg:block">
+              <Image
+                src="/livelo-hero-marketplace-v4.png"
+                alt="Livelo Haiti marketplace"
+                fill
+                priority
+                sizes="448px"
+                className="object-contain [filter:drop-shadow(0_18px_30px_rgba(0,0,0,0.22))]"
+              />
             </div>
           </div>
 
