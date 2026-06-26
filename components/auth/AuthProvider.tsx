@@ -53,7 +53,7 @@ function getUserFromAccessToken(accessToken: string): UserProfile | null {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>(() => (getStoredSession() ? "loading" : "unauthenticated"));
+  const [status, setStatus] = useState<AuthStatus>("unauthenticated");
   const [user, setUser] = useState<UserProfile | null>(null);
   const [tokens, setTokens] = useState<AuthTokens | null>(null);
 
@@ -111,7 +111,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!session) return;
 
     void Promise.resolve()
-      .then(() => loadUser(session))
+      .then(() => {
+        setStatus("loading");
+        return loadUser(session);
+      })
       .catch(() => clearSession());
   }, [clearSession, loadUser]);
 
