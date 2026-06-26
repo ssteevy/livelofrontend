@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { categories } from "@/data/home";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -9,13 +11,13 @@ export function CategoriesSection() {
           <p className="shrink-0 text-sm font-black uppercase text-[#EDA415]">Catégories</p>
           <div className="flex min-w-max items-center gap-3">
             {categories.map((category) => (
-              <a
+              <Link
                 key={category.name}
-                href="#produits"
+                href={`/produits?categorie=${encodeURIComponent(category.name)}`}
                 className="shrink-0 rounded-full border border-[#B3D4E5] bg-[#F8FAFC] px-4 py-2 text-sm font-black text-[#4E73C7] transition hover:border-[#EDA415] hover:text-[#EDA415]"
               >
                 {category.name}
-              </a>
+              </Link>
             ))}
           </div>
         </Reveal>
