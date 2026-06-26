@@ -261,7 +261,7 @@ export function SignupFlow() {
         city_id: details.city || undefined,
         cgu_acceptees: details.acceptTerms,
       });
-      router.push("/profil");
+      router.push("/");
     } catch (error) {
       setApiError(getApiErrorMessage(error));
     } finally {

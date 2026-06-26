@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Mail, MapPin, Phone, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import { useEffect } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -55,6 +56,14 @@ export function ProfilePage() {
   return (
     <main className="min-h-screen bg-[#F8FAFC] px-4 py-10 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-3xl rounded-2xl border border-[#B3D4E5] bg-white p-6 shadow-[0_24px_70px_rgba(78,115,199,0.12)] sm:p-8">
+        <Link
+          href="/"
+          aria-label="Retour à l'accueil"
+          className="mb-6 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#B3D4E5] text-[#4E73C7] transition hover:bg-[#E2F4FF]"
+        >
+          <ArrowLeft aria-hidden="true" size={20} />
+        </Link>
+
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="relative h-16 w-16 overflow-hidden rounded-xl shadow-[0_10px_28px_rgba(78,115,199,0.16)]">

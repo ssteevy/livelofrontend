@@ -29,6 +29,29 @@ function authStateFromResponse(response: AuthResponse) {
   return { tokens, user: response.user };
 }
 
+function getUserFromAccessToken(accessToken: string): UserProfile | null {
+  try {
+    const payload = accessToken.split(".")[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(window.atob(normalized)) as {
+      sub?: string;
+      email?: string;
+      role?: UserProfile["role"];
+    };
+
+    if (!decoded.sub || !decoded.email || !decoded.role) return null;
+    return {
+      id: decoded.sub,
+      email: decoded.email,
+      role: decoded.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(() => (getStoredSession() ? "loading" : "unauthenticated"));
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -49,15 +72,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setStatus("authenticated");
       return profile;
     } catch (error) {
-      if (!(error instanceof ApiError) || error.status !== 401) throw error;
+      if (!(error instanceof ApiError) || error.status !== 401) {
+        const fallbackUser = getUserFromAccessToken(session.access_token);
+        if (!fallbackUser) throw error;
 
-      const refreshed = await authApi.refresh(session.refresh_token);
-      storeSession(refreshed);
-      const profile = await authApi.me(refreshed.access_token);
-      setTokens(refreshed);
-      setUser(profile);
-      setStatus("authenticated");
-      return profile;
+        setTokens(session);
+        setUser(fallbackUser);
+        setStatus("authenticated");
+        return fallbackUser;
+      }
+
+      try {
+        const refreshed = await authApi.refresh(session.refresh_token);
+        storeSession(refreshed);
+        const profile = await authApi.me(refreshed.access_token);
+        setTokens(refreshed);
+        setUser(profile);
+        setStatus("authenticated");
+        return profile;
+      } catch (refreshError) {
+        if (refreshError instanceof ApiError && refreshError.status === 401) {
+          throw refreshError;
+        }
+
+        const fallbackUser = getUserFromAccessToken(session.access_token);
+        if (!fallbackUser) throw refreshError;
+
+        setTokens(session);
+        setUser(fallbackUser);
+        setStatus("authenticated");
+        return fallbackUser;
+      }
     }
   }, []);
 

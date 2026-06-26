@@ -49,7 +49,7 @@ export function LoginForm() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.push("/profil");
+      router.push("/");
     } catch (apiError) {
       setError(getApiErrorMessage(apiError));
     } finally {
