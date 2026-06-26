@@ -54,6 +54,11 @@ export interface City {
   } | null;
 }
 
+export interface Department {
+  id: string;
+  nom: string;
+}
+
 export const authApi = {
   checkEmail(email: string) {
     return apiRequest<{ exists: boolean }>("/auth/check-email", {
@@ -119,9 +124,22 @@ export const authApi = {
       token: accessToken,
     });
   },
+  updateCity(accessToken: string, cityId: string) {
+    return apiRequest<UserProfile>("/auth/me/city", {
+      method: "PUT",
+      token: accessToken,
+      body: { city_id: cityId },
+    });
+  },
 };
 
 export const geoApi = {
+  departments() {
+    return apiRequest<Department[]>("/geo/departments");
+  },
+  citiesByDepartment(departmentId: string) {
+    return apiRequest<City[]>(`/geo/departments/${departmentId}/cities`);
+  },
   cities() {
     return apiRequest<City[]>("/geo/cities");
   },

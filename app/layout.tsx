@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { CartProvider } from "@/components/cart/CartProvider";
 
 export const metadata: Metadata = {
   title: "Livelo Haiti | Marketplace e-commerce haïtienne",
@@ -26,8 +27,10 @@ export default function RootLayout({
       lang="fr"
       className="h-full antialiased"
     >
-      <body className="min-h-full bg-[#F8FAFC] text-[#4E73C7]">
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-full bg-[#F8FAFC] font-sans text-[#4E73C7]">
+        <AuthProvider>
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

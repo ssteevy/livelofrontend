@@ -32,14 +32,22 @@ function normalizeMessage(body: ApiErrorBody | null, fallback: string) {
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { body, token, headers, ...init } = options;
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      // FormData : laisser le navigateur fixer le Content-Type (boundary).
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body:
+      body === undefined
+        ? undefined
+        : isFormData
+          ? (body as FormData)
+          : JSON.stringify(body),
   });
 
   const text = await response.text();
@@ -54,6 +62,17 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   }
 
   return data as T;
+}
+
+/** Construit une query string `?a=1&b=2` en ignorant les valeurs nulles/vides. */
+export function buildQuery(params: Record<string, string | number | boolean | null | undefined>) {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === null || value === undefined || value === "") continue;
+    search.append(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
 }
 
 export function getApiErrorMessage(error: unknown) {
