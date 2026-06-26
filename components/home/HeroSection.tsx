@@ -2,9 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Store, Truck } from "lucide-react";
+import { ArrowRight, ShieldCheck, Store } from "lucide-react";
 import { useEffect, useState } from "react";
+
+const DeliveryLottie = dynamic(
+  () => import("@/components/home/DeliveryLottie").then((m) => m.DeliveryLottie),
+  { ssr: false },
+);
 
 interface Slide {
   eyebrow: string;
@@ -40,11 +46,6 @@ const slides: Slide[] = [
     href: "/devenir-vendeur",
     gradient: "from-[#30BD57] to-[#4E73C7]",
   },
-];
-
-const sideCards = [
-  { icon: Truck, title: "Livraison nationale", text: "10 départements couverts", href: "/produits" },
-  { icon: Store, title: "Devenir vendeur", text: "Ouvrez votre boutique", href: "/devenir-vendeur" },
 ];
 
 export function HeroSection() {
@@ -112,27 +113,39 @@ export function HeroSection() {
 
         {/* Cartes latérales */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-          {sideCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Link
-                key={card.title}
-                href={card.href}
-                className="group flex flex-col justify-between rounded-3xl border border-[#B3D4E5] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#4E73C7]/40 hover:shadow-[0_18px_40px_rgba(78,115,199,0.16)] lg:min-h-[8rem]"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E2F4FF] text-[#4E73C7] transition group-hover:bg-[#4E73C7] group-hover:text-white">
-                  <Icon aria-hidden="true" size={22} />
-                </span>
-                <span className="mt-3">
-                  <span className="block text-sm font-black text-[#4E73C7]">{card.title}</span>
-                  <span className="mt-0.5 flex items-center gap-1 text-xs font-bold text-[#ACACAC] group-hover:text-[#EDA415]">
-                    {card.text}
-                    <ArrowRight size={12} className="transition group-hover:translate-x-0.5" />
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
+          {/* Livraison nationale — animation Lottie */}
+          <Link
+            href="/produits"
+            className="group flex flex-col overflow-hidden rounded-3xl border border-[#B3D4E5] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#4E73C7]/40 hover:shadow-[0_18px_40px_rgba(78,115,199,0.16)]"
+          >
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#E2F4FF]">
+              <DeliveryLottie className="absolute inset-0 flex h-full w-full items-center justify-center" />
+            </div>
+            <div className="flex items-center justify-between gap-2 p-4">
+              <span>
+                <span className="block text-sm font-black text-[#4E73C7]">Livraison nationale</span>
+                <span className="mt-0.5 block text-xs font-bold text-[#ACACAC]">10 départements couverts</span>
+              </span>
+              <ArrowRight aria-hidden="true" size={16} className="shrink-0 text-[#4E73C7] transition group-hover:translate-x-0.5 group-hover:text-[#EDA415]" />
+            </div>
+          </Link>
+
+          {/* Devenir vendeur */}
+          <Link
+            href="/devenir-vendeur"
+            className="group flex flex-col justify-between rounded-3xl border border-[#B3D4E5] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#4E73C7]/40 hover:shadow-[0_18px_40px_rgba(78,115,199,0.16)] lg:min-h-[8rem]"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E2F4FF] text-[#4E73C7] transition group-hover:bg-[#4E73C7] group-hover:text-white">
+              <Store aria-hidden="true" size={22} />
+            </span>
+            <span className="mt-3">
+              <span className="block text-sm font-black text-[#4E73C7]">Devenir vendeur</span>
+              <span className="mt-0.5 flex items-center gap-1 text-xs font-bold text-[#ACACAC] group-hover:text-[#EDA415]">
+                Ouvrez votre boutique
+                <ArrowRight size={12} className="transition group-hover:translate-x-0.5" />
+              </span>
+            </span>
+          </Link>
         </div>
       </div>
     </section>
