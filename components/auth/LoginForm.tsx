@@ -44,8 +44,8 @@ export function LoginForm() {
   return (
     <AuthShell>
       <div className="text-center lg:text-left">
-        <h1 className="text-2xl font-black text-[#4E73C7] sm:text-3xl">Bon retour 👋</h1>
-        <p className="mt-2 text-sm font-medium text-[#ACACAC]">Connectez-vous pour continuer vos achats sur Livelo.</p>
+        <h1 className="text-2xl font-black text-[#4E73C7] sm:text-2xl text-center">Bon retour</h1>
+        <p className="mt-2 text-sm font-medium text-[#ACACAC] text-center">Connectez-vous pour continuer vos achats sur Livelo.</p>
       </div>
 
       <form className="mt-8 space-y-4" onSubmit={handleSubmit}>

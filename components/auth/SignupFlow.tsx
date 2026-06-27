@@ -253,8 +253,8 @@ export function SignupFlow() {
 
   function renderEmailStep() {
     return (
-      <>        <h1 className="mt-5 text-xl font-black text-black">Bienvenue sur Livelo</h1>
-        <p className="mt-3 text-base text-black/80">Utilisez votre email pour vous inscrire.</p>
+      <>        <h1 className="mt-5 text-xl font-black text-black text-center">Bienvenue sur Livelo</h1>
+        <p className="mt-3 text-base text-black/80 text-center">Utilisez votre email pour vous inscrire.</p>
         <div className="mt-9">
           <TextInput
             label="Email"
